@@ -1,10 +1,12 @@
 package com.example.fresh_farm_products.DTO;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class ApiResponse<T> {
 
     private boolean success;

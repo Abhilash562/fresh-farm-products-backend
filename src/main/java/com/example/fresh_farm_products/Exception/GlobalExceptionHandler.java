@@ -52,20 +52,21 @@ public class GlobalExceptionHandler {
                         null
                 ));
     }
-
-
-
+    
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleGeneral(
             Exception ex){
+
+        ex.printStackTrace(); // Add this
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiResponse<>(
                         false,
-                        "Something went wrong",
+                        ex.getMessage(),
                         null
                 ));
     }
+
 
 }
