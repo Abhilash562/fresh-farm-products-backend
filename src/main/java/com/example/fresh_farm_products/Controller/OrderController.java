@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,5 +74,49 @@ public class OrderController {
                 )
         );
     }
+    
+    //Track Order
+    
+    @GetMapping("/{orderId}/tracking")
+    public ResponseEntity<ApiResponse<List<OrderTrackingResponse>>> trackOrder(
+            @PathVariable String orderId) {
 
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Tracking fetched successfully",
+                        orderService.trackOrder(orderId)
+                )
+        );
+    }
+    
+    //Cancel Order
+    
+    @PutMapping("/{orderId}/cancel")
+    public ResponseEntity<ApiResponse<String>> cancelOrder(
+            @PathVariable String orderId) {
+
+        orderService.cancelOrder(orderId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true,
+                        "Order cancelled successfully",
+                        null)
+        );
+    }
+    
+    //Re-Order
+    
+    @PostMapping("/{orderId}/reorder")
+    public ResponseEntity<ApiResponse<OrderResponse>> reorder(
+            @PathVariable String orderId) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Reorder created successfully",
+                        orderService.reorder(orderId)
+                )
+        );
+    }
 }

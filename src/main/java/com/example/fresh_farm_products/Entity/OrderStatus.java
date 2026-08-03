@@ -3,7 +3,7 @@ package com.example.fresh_farm_products.Entity;
 public enum OrderStatus {
 	
 	PENDING,
-    CONFIRMED,
+	ORDER_PLACED,
     PREPARING,
     OUT_FOR_DELIVERY,
     DELIVERED,

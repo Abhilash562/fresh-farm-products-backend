@@ -28,7 +28,8 @@ public class Order {
 
 
     private String customerId;
-
+    
+    private Long addressId;
 
     private Double totalAmount;
 

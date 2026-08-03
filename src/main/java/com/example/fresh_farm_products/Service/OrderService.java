@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.fresh_farm_products.Controller.OrderTrackingResponse;
 import com.example.fresh_farm_products.DTO.AddressResponse;
 import com.example.fresh_farm_products.DTO.OrderItemResponse;
 import com.example.fresh_farm_products.DTO.OrderResponse;
@@ -15,9 +16,13 @@ import com.example.fresh_farm_products.Entity.CustomerAddress;
 import com.example.fresh_farm_products.Entity.Order;
 import com.example.fresh_farm_products.Entity.OrderItem;
 import com.example.fresh_farm_products.Entity.OrderStatus;
+import com.example.fresh_farm_products.Entity.OrderStatusHistory;
 import com.example.fresh_farm_products.Exception.ResourceNotFoundException;
 import com.example.fresh_farm_products.Repository.CustomerAddressRepository;
 import com.example.fresh_farm_products.Repository.OrderRepository;
+import com.example.fresh_farm_products.Repository.OrderStatusHistoryRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class OrderService {
@@ -27,6 +32,9 @@ public class OrderService {
 	
 	@Autowired
     private CustomerAddressRepository addressRepository;
+	
+	@Autowired
+    private OrderStatusHistoryRepository historyRepository;
 
     public OrderResponse placeOrder(PlaceOrderRequest request) {
 
@@ -54,9 +62,10 @@ public class OrderService {
         Order order = Order.builder()
                 .orderId(orderId)
                 .customerId(request.getCustomerId())
+                .addressId(request.getAddressId())
                 .totalAmount(totalAmount)
                 .paymentMethod(request.getPaymentMethod())
-                .orderStatus(OrderStatus.PENDING)
+                .orderStatus(OrderStatus.ORDER_PLACED)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -75,6 +84,14 @@ public class OrderService {
         order.setItems(orderItems);
 
         Order savedOrder = orderRepository.save(order);
+        
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .order(savedOrder)
+                .status(OrderStatus.ORDER_PLACED)
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        historyRepository.save(history);
 
         return convertToResponse(savedOrder, address);
     }
@@ -88,17 +105,32 @@ public class OrderService {
                                 "Order not found"
                         )
                 );
+        CustomerAddress address = addressRepository
+                .findById(order.getAddressId())
+                .orElse(null);
 
-        return convertToResponse(order, null);
+        return convertToResponse(order, address);
     }
 
     public List<OrderResponse> getCustomerOrders(String customerId) {
+
         return orderRepository
                 .findByCustomerIdOrderByCreatedAtDesc(customerId)
                 .stream()
-                .map(order ->
-                        convertToResponse(order, null)
-                )
+                .map(order -> {
+
+
+                    CustomerAddress address = addressRepository
+                            .findById(order.getAddressId())
+                            .orElse(null);
+
+
+                    return convertToResponse(
+                            order,
+                            address
+                    );
+
+                })
                 .toList();
     }
 
@@ -154,5 +186,98 @@ public class OrderService {
         response.setItems(items);
 
         return response;
+    }
+    
+    public List<OrderTrackingResponse> trackOrder(String orderId) {
+
+        return historyRepository
+                .findByOrderOrderIdOrderByUpdatedAtAsc(orderId)
+                .stream()
+                .map(history -> new OrderTrackingResponse(
+                        history.getStatus(),
+                        history.getUpdatedAt()
+                ))
+                .toList();
+    }
+    
+    @Transactional
+    public void cancelOrder(String orderId) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Order not found"));
+
+        if (order.getOrderStatus() != OrderStatus.ORDER_PLACED) {
+            throw new IllegalStateException(
+                    "Only pending orders can be cancelled.");
+        }
+
+        order.setOrderStatus(OrderStatus.CANCELLED);
+
+        orderRepository.save(order);
+
+        historyRepository.save(
+                OrderStatusHistory.builder()
+                        .order(order)
+                        .status(OrderStatus.CANCELLED)
+                        .updatedAt(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    @Transactional
+    public OrderResponse reorder(String orderId) {
+
+        Order oldOrder = orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Order not found"));
+
+        if (oldOrder.getOrderStatus() != OrderStatus.DELIVERED) {
+            throw new IllegalStateException(
+                    "Only delivered orders can be reordered.");
+        }
+
+        String newOrderId = "ORD-" +
+                UUID.randomUUID().toString()
+                        .substring(0, 8)
+                        .toUpperCase();
+
+        Order newOrder = Order.builder()
+                .orderId(newOrderId)
+                .customerId(oldOrder.getCustomerId())
+                .addressId(oldOrder.getAddressId())
+                .paymentMethod(oldOrder.getPaymentMethod())
+                .totalAmount(oldOrder.getTotalAmount())
+                .orderStatus(OrderStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        List<OrderItem> items = oldOrder.getItems()
+                .stream()
+                .map(item -> OrderItem.builder()
+                        .productId(item.getProductId())
+                        .quantity(item.getQuantity())
+                        .price(item.getPrice())
+                        .order(newOrder)
+                        .build())
+                .toList();
+
+        newOrder.setItems(items);
+
+        Order saved = orderRepository.save(newOrder);
+
+        historyRepository.save(
+                OrderStatusHistory.builder()
+                        .order(saved)
+                        .status(OrderStatus.ORDER_PLACED)
+                        .updatedAt(LocalDateTime.now())
+                        .build()
+        );
+
+        CustomerAddress address = addressRepository
+                .findById(saved.getAddressId())
+                .orElse(null);
+
+        return convertToResponse(saved, address);
     }
 }
