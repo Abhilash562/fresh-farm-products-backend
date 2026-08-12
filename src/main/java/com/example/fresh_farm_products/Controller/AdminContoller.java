@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.fresh_farm_products.DTO.AdminLoginRequest;
 import com.example.fresh_farm_products.DTO.AdminLoginResponse;
 import com.example.fresh_farm_products.DTO.AdminRegisterRequest;
 import com.example.fresh_farm_products.DTO.ApiResponse;
-import com.example.fresh_farm_products.Entity.AdminLoginRequest;
 import com.example.fresh_farm_products.Service.AdminService;
 
 @RestController

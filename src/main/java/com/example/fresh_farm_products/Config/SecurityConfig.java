@@ -37,7 +37,9 @@ public class SecurityConfig {
                                 "/api/customers/register",
                                 "/api/customers/login",
                                 "/api/admin/register",
-                                "/api/admin/login"
+                                "/api/admin/login",
+                                "/api/delivery-partners/register",
+                                "/api/delivery-partners/login"
                         )
                         .permitAll()
                         .anyRequest()

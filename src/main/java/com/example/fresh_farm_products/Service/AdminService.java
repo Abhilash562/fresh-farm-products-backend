@@ -5,10 +5,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.fresh_farm_products.Config.JwtUtil;
+import com.example.fresh_farm_products.DTO.AdminLoginRequest;
 import com.example.fresh_farm_products.DTO.AdminLoginResponse;
 import com.example.fresh_farm_products.DTO.AdminRegisterRequest;
 import com.example.fresh_farm_products.Entity.Admin;
-import com.example.fresh_farm_products.Entity.AdminLoginRequest;
 import com.example.fresh_farm_products.Repository.AdminRepository;
 
 @Service
