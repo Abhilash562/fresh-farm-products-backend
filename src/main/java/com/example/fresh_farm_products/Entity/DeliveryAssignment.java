@@ -38,7 +38,7 @@ public class DeliveryAssignment {
     private Long id;
 
     @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    private String orderId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "delivery_partner_id", nullable = false)
@@ -53,5 +53,7 @@ public class DeliveryAssignment {
 
     @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
-
+    
+    @Column(name = "expected_delivery_at")
+    private LocalDateTime expectedDeliveryAt;
 }

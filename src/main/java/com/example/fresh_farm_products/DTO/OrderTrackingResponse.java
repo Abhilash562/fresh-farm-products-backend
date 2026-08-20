@@ -1,4 +1,4 @@
-package com.example.fresh_farm_products.Controller;
+package com.example.fresh_farm_products.DTO;
 
 import java.time.LocalDateTime;
 

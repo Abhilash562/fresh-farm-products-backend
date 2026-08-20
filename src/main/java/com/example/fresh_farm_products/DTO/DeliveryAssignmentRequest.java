@@ -7,7 +7,7 @@ import lombok.Data;
 public class DeliveryAssignmentRequest {
 	
 	@NotNull(message = "Order ID is required")
-    private Long orderId;
+    private String orderId;
 
     @NotNull(message = "Delivery partner ID is required")
     private Long deliveryPartnerId;

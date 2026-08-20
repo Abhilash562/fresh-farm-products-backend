@@ -13,7 +13,7 @@ public class DeliveryAssignmentResponse {
 	
 	private Long id;
 
-    private Long orderId;
+    private String orderId;
 
     private Long deliveryPartnerId;
 
@@ -26,5 +26,7 @@ public class DeliveryAssignmentResponse {
     private LocalDateTime assignedAt;
 
     private LocalDateTime deliveredAt;
+    
+    private LocalDateTime expectedDeliveryAt;
 
 }

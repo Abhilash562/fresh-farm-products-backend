@@ -195,6 +195,37 @@ public class DeliveryAssignmentService {
                 .deliveryStatus(assignment.getDeliveryStatus())
                 .assignedAt(assignment.getAssignedAt())
                 .deliveredAt(assignment.getDeliveredAt())
+                .expectedDeliveryAt(assignment.getExpectedDeliveryAt())
+                .build();
+    }
+    
+    @Transactional
+    public List<DeliveryAssignmentResponse> getAllDeliveryAssignments() {
+
+        List<DeliveryAssignment> assignments =
+        		assignmentRepository.findAll();
+
+        return assignments.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private DeliveryAssignmentResponse mapToResponse(
+            DeliveryAssignment assignment) {
+
+        return DeliveryAssignmentResponse.builder()
+                .id(assignment.getId())
+                .orderId(assignment.getOrderId())
+                .deliveryPartnerId(
+                        assignment.getDeliveryPartner().getId())
+                .partnerName(
+                        assignment.getDeliveryPartner().getName())
+                .partnerMobile(
+                        assignment.getDeliveryPartner().getMobileNumber())
+                .deliveryStatus(assignment.getDeliveryStatus())
+                .assignedAt(assignment.getAssignedAt())
+                .deliveredAt(assignment.getDeliveredAt())
+                .expectedDeliveryAt(assignment.getExpectedDeliveryAt())
                 .build();
     }
 }

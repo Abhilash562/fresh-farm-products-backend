@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.fresh_farm_products.DTO.ApiResponse;
 import com.example.fresh_farm_products.DTO.DeliveryAssignmentRequest;
 import com.example.fresh_farm_products.DTO.DeliveryAssignmentResponse;
+import com.example.fresh_farm_products.DTO.ExpectedDeliveryRequest;
 import com.example.fresh_farm_products.DTO.UpdateDeliveryStatusRequest;
+import com.example.fresh_farm_products.Entity.DeliveryAssignment;
+import com.example.fresh_farm_products.Repository.DeliveryAssignmentRepository;
 import com.example.fresh_farm_products.Service.DeliveryAssignmentService;
 
 import jakarta.validation.Valid;
@@ -129,5 +133,40 @@ public class DeliveryAssignmentController {
                         )
                 )
         );
+    }
+    
+    //All assignements
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<DeliveryAssignmentResponse>>>
+            getAllDeliveryAssignments() {
+
+        List<DeliveryAssignmentResponse> assignments =
+        		assignmentService.getAllDeliveryAssignments();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        "Delivery assignments fetched successfully",
+                        assignments
+                ));
+    }
+    
+    @Autowired
+    private DeliveryAssignmentRepository assignmentRepository;
+    
+    @PutMapping("/{id}/expected-delivery")
+    public ResponseEntity<DeliveryAssignment> updateExpectedDelivery(
+            @PathVariable Long id,
+            @RequestBody ExpectedDeliveryRequest request) {
+
+        DeliveryAssignment assignment = assignmentRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Delivery assignment not found"));
+
+        assignment.setExpectedDeliveryAt(request.getExpectedDeliveryAt());
+
+        DeliveryAssignment updated = assignmentRepository.save(assignment);
+
+        return ResponseEntity.ok(updated);
     }
 }
